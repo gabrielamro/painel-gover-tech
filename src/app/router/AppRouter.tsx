@@ -19,7 +19,7 @@ const DesignSystemPage = lazy(() =>
   import('../../features/design-system/DesignSystemPage').then((m) => ({ default: m.DesignSystemPage }))
 );
 const SuperintendencePage = lazy(() =>
-  import('../../features/management/ManagementPage').then((m) => ({ default: m.ManagementPage }))
+  import('../../features/superintendence/SuperintendencePage').then((m) => ({ default: m.SuperintendencePage }))
 );
 const UpdatePage = lazy(() =>
   import('../../features/updates/UpdatePage').then((m) => ({ default: m.UpdatePage }))
