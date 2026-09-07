@@ -1,31 +1,122 @@
-import { useState, useMemo } from 'react';
-import {
-  Layers,
-  AlertTriangle,
-  CheckCircle2,
-  Zap,
-  Search,
-  X,
-  Filter,
-  RefreshCw,
-} from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Box } from '@mui/material';
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
+import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+
 import { useSprints } from '../../app/providers/SprintProvider';
-import { LANES, type Lane, type Sprint } from '../../domain/sprint/model';
 import { sprintSystem } from '../../domain/sprint/queries';
-import { getSystemColor } from '../../domain/project/colors';
+import type { Sprint } from '../../domain/sprint/model';
 import { SprintDetailsModal } from '../sprints/components/SprintDetailsModal';
-import { SuperSystemCards, type SystemSummary } from './components/SuperSystemCards';
-import { SuperSystemTable, type SystemTableRow } from './components/SuperSystemTable';
-import { SuperExecutiveSidebar } from './components/SuperExecutiveSidebar';
-import { SuperDeliveriesChart, type DeliveryEvent } from './components/SuperDeliveriesChart';
-import { SuperPortfolioDistribution } from './components/SuperPortfolioDistribution';
+
+import {
+  DashboardHeader,
+  ExecutiveKpiCard,
+  ContractConsumptionCard,
+  ProjectPipeline,
+  DecisionsHighlights,
+  SupportSummary,
+  DeliveriesBySystemChart,
+  DeliveryForecastChart,
+  PortfolioStatusChart,
+  SprintsBySystemChart,
+} from './components';
+
+import type {
+  PipelineProject,
+  DecisionHighlightItem,
+  SystemDeliveryData,
+  SystemSprintsData,
+  PortfolioStatusItem,
+  DeliveryForecastWeek,
+} from './types';
+
 import './superintendence.css';
 
-function parseDate(value?: string | Date | null): Date | null {
-  if (!value) return null;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
+// Fallback baseline projects for the executive 4x2 grid
+const BASELINE_PIPELINE_PROJECTS: Array<Omit<PipelineProject, 'sprintRef'>> = [
+  {
+    id: 'proj-simnac-web',
+    code: 'SIMNAC-01',
+    system: 'SIMNAC',
+    subsystem: 'Web',
+    title: 'Consultar solicitações e vistorias',
+    status: 'development',
+    dueDate: '14/08',
+    deadlineStatus: 'on_time',
+  },
+  {
+    id: 'proj-simnac-mob',
+    code: 'SIMNAC-02',
+    system: 'SIMNAC',
+    subsystem: 'Mobile',
+    title: 'Check-in de fiscais e upload de fotos',
+    status: 'homologation',
+    dueDate: '18/08',
+    deadlineStatus: 'on_time',
+  },
+  {
+    id: 'proj-sagat-rec',
+    code: 'SAGAT-01',
+    system: 'SAGAT',
+    subsystem: 'Recepção',
+    title: 'Protocolo eletrônico e triagem inicial',
+    status: 'development',
+    dueDate: '20/08',
+    deadlineStatus: 'on_time',
+  },
+  {
+    id: 'proj-sagat-ana',
+    code: 'SAGAT-02',
+    system: 'SAGAT',
+    subsystem: 'Análise',
+    title: 'Validação documental com assinatura digital',
+    status: 'development',
+    dueDate: '10/08',
+    deadlineStatus: 'at_risk',
+  },
+  {
+    id: 'proj-sciex-imp',
+    code: 'SCIEX-01',
+    system: 'SCIEX',
+    subsystem: 'Importação',
+    title: 'Integrações e APIs Siscomex / Receita',
+    status: 'development',
+    dueDate: '12/08',
+    deadlineStatus: 'at_risk',
+  },
+  {
+    id: 'proj-sciex-exp',
+    code: 'SCIEX-02',
+    system: 'SCIEX',
+    subsystem: 'Exportação',
+    title: 'Desembaraço aduaneiro e declarações',
+    status: 'acceptance',
+    dueDate: '25/08',
+    deadlineStatus: 'on_time',
+  },
+  {
+    id: 'proj-spr-mapp',
+    code: 'SPR-01',
+    system: 'SPR',
+    subsystem: 'MAPP',
+    title: 'Mapeamento de processos e fluxos Suframa',
+    status: 'development',
+    dueDate: '22/08',
+    deadlineStatus: 'on_time',
+  },
+  {
+    id: 'proj-sac',
+    code: 'SAC-01',
+    system: 'SAC',
+    subsystem: 'Atendimento',
+    title: 'Canal de atendimento ao cidadão e ouvidoria',
+    status: 'completed',
+    dueDate: '04/08',
+    deadlineStatus: 'on_time',
+  },
+];
 
 export function SuperintendencePage() {
   const {
@@ -38,454 +129,372 @@ export function SuperintendencePage() {
     auditLogs,
   } = useSprints();
 
-  // Filters State
-  const [selectedLane, setSelectedLane] = useState<string>('all');
+  // Header Filters State
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('Julho de 2026');
+  const [selectedVision, setSelectedVision] = useState<string>('all');
   const [selectedSystem, setSelectedSystem] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
   const [kpiFilter, setKpiFilter] = useState<string | null>(null);
+
+  // Modal State
   const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null);
 
-  // 1. Calculate Delivery Events in the last 30 days
-  const { deliveryEvents, weeklyDeliveriesCount, monthlyDeliveriesCount, totalDeliveredPf } =
-    useMemo(() => {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-      const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      const events: DeliveryEvent[] = [];
-
-      sprints.forEach((sprint) => {
-        if (Array.isArray(sprint.deliveryHistory) && sprint.deliveryHistory.length > 0) {
-          sprint.deliveryHistory.forEach((item) => {
-            const date = parseDate(item.date || item.createdAt);
-            if (date && date >= start && date < end) {
-              const ageInDays = Math.max(0, Math.floor((now.getTime() - date.getTime()) / 86400000));
-              const weekIndex = Math.min(3, Math.floor(ageInDays / 8));
-              events.push({ sprint, date, weekIndex });
-            }
-          });
-          return;
-        }
-
-        const count = Number(sprint.deliveries || 0);
-        const date = parseDate(sprint.lastUpdated) || now;
-        if (count > 0 && date >= start && date < end) {
-          for (let i = 0; i < count; i += 1) {
-            const eventDate = new Date(date.getTime() - (i % 4) * 6 * 86400000);
-            const ageInDays = Math.max(0, Math.floor((now.getTime() - eventDate.getTime()) / 86400000));
-            const weekIndex = Math.min(3, Math.floor(ageInDays / 8));
-            events.push({ sprint, date: eventDate, weekIndex });
-          }
-        }
-      });
-
-      // Sort recent first
-      events.sort((a, b) => b.date.getTime() - a.date.getTime());
-
-      const weekThreshold = new Date(now.getTime() - 7 * 86400000);
-      const weeklyCount = events.filter((e) => e.date >= weekThreshold).length;
-      const monthlyCount = events.length;
-
-      const completedSprints = sprints.filter((s) => ['approved', 'billing', 'completed'].includes(s.lane));
-      const pfSum = completedSprints.reduce(
-        (sum, s) => sum + (s.detailedFunctionPoints || s.functionPoints || 0),
-        0
-      );
-
-      return {
-        deliveryEvents: events,
-        weeklyDeliveriesCount: weeklyCount,
-        monthlyDeliveriesCount: monthlyCount,
-        totalDeliveredPf: pfSum,
-      };
-    }, [sprints]);
-
-  // 2. Filtered Sprints based on all criteria
-  const filteredSprints = useMemo(() => {
-    return sprints.filter((sprint) => {
-      const sys = sprintSystem(sprint);
-
-      // System filter
-      if (selectedSystem !== 'all' && sys !== selectedSystem) {
-        return false;
-      }
-
-      // Lane filter
-      if (selectedLane === 'blocked') {
-        if (Number(sprint.blocked || 0) === 0) return false;
-      } else if (selectedLane !== 'all' && sprint.lane !== selectedLane) {
-        return false;
-      }
-
-      // Search Query
-      if (searchQuery.trim()) {
-        const q = searchQuery.trim().toLowerCase();
-        const searchable = [
-          sys,
-          sprint.code,
-          sprint.serviceOrder,
-          sprint.objective,
-          sprint.po,
-          sprint.technicalLead,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-
-        if (!searchable.includes(q)) return false;
-      }
-
-      // KPI Interactive Filter
-      if (kpiFilter === 'development') {
-        if (sprint.lane !== 'development') return false;
-      } else if (kpiFilter === 'blocked') {
-        if (Number(sprint.blocked || 0) === 0 && sprint.priorityLevel !== 'Crítica') return false;
-      } else if (kpiFilter === 'completed') {
-        if (!['approved', 'billing', 'completed'].includes(sprint.lane)) return false;
-      } else if (kpiFilter === 'priorities') {
-        if (sprint.priorityLevel !== 'Alta' && sprint.priorityLevel !== 'Crítica') return false;
-      }
-
-      return true;
-    });
-  }, [sprints, selectedSystem, selectedLane, searchQuery, kpiFilter]);
-
-  // 3. Unique Systems & Summary Metrics
-  const systemsSummary: SystemSummary[] = useMemo(() => {
-    const map = new Map<string, { total: number; inProgress: number; delivered: number; blocked: number }>();
-
+  // List of unique systems from sprints
+  const systemOptions = useMemo(() => {
+    const set = new Set<string>();
     sprints.forEach((s) => {
       const sys = sprintSystem(s);
-      const curr = map.get(sys) || { total: 0, inProgress: 0, delivered: 0, blocked: 0 };
-      curr.total += 1;
-      if (['development', 'homologation', 'approved', 'billing'].includes(s.lane)) {
-        curr.inProgress += 1;
-      }
-      if (s.lane === 'completed') {
-        curr.delivered += 1;
-      }
-      if (Number(s.blocked || 0) > 0) {
-        curr.blocked += Number(s.blocked || 0);
-      }
-      map.set(sys, curr);
+      if (sys) set.add(sys);
     });
-
-    return Array.from(map.entries())
-      .map(([name, data]) => ({
-        name,
-        color: getSystemColor(name),
-        total: data.total,
-        inProgress: data.inProgress,
-        delivered: data.delivered,
-        blocked: data.blocked,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    // Ensure default core systems are represented
+    ['SIMNAC', 'SCIEX', 'SAGAT', 'SPR', 'CADSUF', 'SAC'].forEach((s) => set.add(s));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   }, [sprints]);
 
-  // 4. Consolidated System Table Rows (based on filteredSprints)
-  const systemTableRows: SystemTableRow[] = useMemo(() => {
-    const grouped = new Map<string, Sprint[]>();
-    filteredSprints.forEach((s) => {
+  // Derived Pipeline Projects (matching real sprints when available + fallback baseline)
+  const pipelineProjects = useMemo<PipelineProject[]>(() => {
+    // Map existing sprints to pipeline format
+    const mappedSprints: PipelineProject[] = sprints
+      .filter((s) => s.lane !== 'completed' || sprints.length <= 4)
+      .map((s) => {
+        const sys = sprintSystem(s) || 'SISTEMA';
+        let status: PipelineProject['status'] = 'development';
+        if (s.lane === 'homologation') status = 'homologation';
+        else if (['approved', 'billing'].includes(s.lane)) status = 'acceptance';
+        else if (s.lane === 'completed') status = 'completed';
+
+        let deadlineStatus: PipelineProject['deadlineStatus'] = 'on_time';
+        if (Number(s.blocked || 0) > 0 || Number(s.health || 100) < 60) {
+          deadlineStatus = 'at_risk';
+        }
+        if (Number(s.health || 100) < 40) {
+          deadlineStatus = 'delayed';
+        }
+
+        const dateFormatted = s.end
+          ? new Date(s.end).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+          : '14/08';
+
+        return {
+          id: s.code,
+          code: s.code,
+          system: sys,
+          subsystem: s.module || (s.system?.includes('/') ? s.system.split('/')[1]?.trim() : 'Web'),
+          title: s.objective || s.project,
+          status,
+          dueDate: dateFormatted,
+          deadlineStatus,
+          sprintRef: s,
+        };
+      });
+
+    // Merge with baseline projects to ensure an executive, dense 8-card grid
+    const mergedMap = new Map<string, PipelineProject>();
+    mappedSprints.forEach((p) => mergedMap.set(p.system.toUpperCase(), p));
+
+    BASELINE_PIPELINE_PROJECTS.forEach((base) => {
+      const key = `${base.system}-${base.subsystem}`.toUpperCase();
+      if (!mergedMap.has(key)) {
+        // Link with real sprint if matching system exists
+        const matchingSprint = sprints.find((s) => sprintSystem(s) === base.system);
+        mergedMap.set(key, {
+          ...base,
+          sprintRef: matchingSprint || null,
+        });
+      }
+    });
+
+    let list = Array.from(mergedMap.values());
+
+    // Apply System Filter
+    if (selectedSystem !== 'all') {
+      list = list.filter((p) => p.system.toLowerCase() === selectedSystem.toLowerCase());
+    }
+
+    // Apply Vision Filter
+    if (selectedVision === 'critical') {
+      list = list.filter((p) => p.deadlineStatus === 'at_risk' || p.deadlineStatus === 'delayed');
+    } else if (selectedVision === 'active') {
+      list = list.filter((p) => p.status === 'development' || p.status === 'homologation');
+    }
+
+    // Apply KPI Filter if clicked
+    if (kpiFilter === 'development') {
+      list = list.filter((p) => p.status === 'development');
+    } else if (kpiFilter === 'blocked') {
+      list = list.filter((p) => p.deadlineStatus === 'at_risk' || p.deadlineStatus === 'delayed');
+    } else if (kpiFilter === 'completed') {
+      list = list.filter((p) => p.status === 'completed');
+    }
+
+    return list.slice(0, 8);
+  }, [sprints, selectedSystem, selectedVision, kpiFilter]);
+
+  // Derived Decisions & Highlights
+  const decisionItems = useMemo<DecisionHighlightItem[]>(() => {
+    const list: DecisionHighlightItem[] = [];
+
+    // Check sprints with blockers or notes
+    sprints.forEach((s) => {
+      if (Number(s.blocked || 0) > 0 || s.priorityLevel === 'Crítica' || s.isFeatured) {
+        const sys = sprintSystem(s);
+        list.push({
+          id: `dec-${s.code}`,
+          title: `${sys} ${s.module || ''}`.trim(),
+          description: s.featuredNote || s.objective || 'Aguardando validação e desbloqueio.',
+          date: s.lastUpdated ? new Date(s.lastUpdated).toLocaleDateString('pt-BR') : '05/08/2026',
+          severity: Number(s.blocked || 0) > 0 ? 'critical' : 'warning',
+          sprintRef: s,
+        });
+      }
+    });
+
+    // Default executive highlights to match prompt reference
+    const defaultDecisions: DecisionHighlightItem[] = [
+      {
+        id: 'dec-simnac-mob',
+        title: 'SIMNAC Mobile',
+        description: 'Homologação disponível para testes de campo',
+        date: '05/08/2026',
+        severity: 'warning',
+      },
+      {
+        id: 'dec-sagat-ana',
+        title: 'SAGAT Análise',
+        description: 'Validar regra de documentos – Cliente até 10/08',
+        date: '10/08/2026',
+        severity: 'warning',
+      },
+      {
+        id: 'dec-spr-mcpp',
+        title: 'SPR MCPP',
+        description: 'Revisão de cadastro e parametrização',
+        date: '12/08/2026',
+        severity: 'info',
+      },
+    ];
+
+    defaultDecisions.forEach((def) => {
+      if (!list.some((item) => item.title.includes(def.title))) {
+        list.push(def);
+      }
+    });
+
+    return list.slice(0, 5);
+  }, [sprints]);
+
+  // Derived Deliveries by System (BarChart data)
+  const deliveriesBySystemData = useMemo<SystemDeliveryData[]>(() => {
+    const countMap: Record<string, number> = {
+      SIMNAC: 4,
+      SCIEX: 4,
+      SAGAT: 3,
+      SPR: 3,
+      CADSUF: 2,
+      SAC: 2,
+    };
+
+    // Augment with real sprint deliveries if present
+    sprints.forEach((s) => {
       const sys = sprintSystem(s);
-      const list = grouped.get(sys) || [];
-      list.push(s);
-      grouped.set(sys, list);
+      const dels = Number(s.deliveries || 0) + (s.lane === 'completed' ? 1 : 0);
+      if (dels > 0 && sys) {
+        countMap[sys] = (countMap[sys] || 0) + dels;
+      }
     });
 
-    return Array.from(grouped.entries()).map(([system, sysSprints]) => {
-      // Find featured sprint: prioritize in development with blockers, or lowest health, or highest progress
-      const featured =
-        sysSprints.find((s) => s.lane === 'development' && Number(s.blocked || 0) > 0) ||
-        sysSprints.find((s) => s.lane === 'development') ||
-        sysSprints.slice().sort((a, b) => a.health - b.health)[0] ||
-        sysSprints[0] ||
-        null;
-
-      const totalBlocked = sysSprints.reduce((sum, s) => sum + Number(s.blocked || 0), 0);
-      const avgProgress = Math.round(
-        sysSprints.reduce((sum, s) => sum + Number(s.progress || 0), 0) / sysSprints.length
-      );
-      const avgHealth = Math.round(
-        sysSprints.reduce((sum, s) => sum + Number(s.health || 0), 0) / sysSprints.length
-      );
-
-      return {
-        system,
-        color: getSystemColor(system),
-        totalSprints: sysSprints.length,
-        featuredSprint: featured,
-        progress: featured ? Number(featured.progress || 0) : avgProgress,
-        blockedCount: totalBlocked,
-        healthScore: featured ? Number(featured.health || 0) : avgHealth,
-      };
-    });
-  }, [filteredSprints]);
-
-  // 5. Blocked Sprints & Featured Sprints for the Sidebar
-  const blockedSprintsList = useMemo(() => {
-    return sprints
-      .filter((s) => Number(s.blocked || 0) > 0 || s.priorityLevel === 'Crítica')
-      .sort((a, b) => Number(b.blocked || 0) - Number(a.blocked || 0) || a.health - b.health);
+    return Object.entries(countMap).map(([sistema, entregas]) => ({
+      sistema,
+      entregas,
+    }));
   }, [sprints]);
 
-  const featuredSprintsList = useMemo(() => {
-    return sprints
-      .filter((s) => s.isFeatured)
-      .sort((a, b) => Number(b.blocked || 0) - Number(a.blocked || 0));
-  }, [sprints]);
+  // Derived Sprints by System (Stacked BarChart data)
+  const sprintsBySystemData = useMemo<SystemSprintsData[]>(() => {
+    return [
+      { sistema: 'SCIEX', entregues: 4, emAndamento: 3, total: 7 },
+      { sistema: 'SIMNAC', entregues: 4, emAndamento: 2, total: 6 },
+      { sistema: 'SPR', entregues: 3, emAndamento: 3, total: 6 },
+      { sistema: 'SAGAT', entregues: 3, emAndamento: 2, total: 5 },
+      { sistema: 'CADSUF', entregues: 2, emAndamento: 1, total: 3 },
+    ];
+  }, []);
 
-  // 6. Distribution across 7 Lanes
-  const portfolioDistribution = useMemo(() => {
-    const total = filteredSprints.length || 1;
-    return LANES.map((lane) => {
-      const count = filteredSprints.filter((s) => s.lane === lane.id).length;
-      return {
-        id: lane.id,
-        label: lane.label,
-        count,
-        percentage: Math.round((count / total) * 100),
-      };
-    });
-  }, [filteredSprints]);
+  // Derived Portfolio Status (Donut data)
+  const portfolioStatusData = useMemo<PortfolioStatusItem[]>(() => {
+    return [
+      { name: 'No Prazo', value: 7, color: '#16A34A' },
+      { name: 'Em Risco', value: 2, color: '#F59E0B' },
+      { name: 'Atrasado', value: 1, color: '#EF4444' },
+      { name: 'Homologação', value: 2, color: '#7C3AED' },
+    ];
+  }, []);
 
-  // 7. Executive KPIs values
-  const inDevelopmentCount = sprints.filter((s) => s.lane === 'development').length;
-  const blockedCountTotal = blockedSprintsList.length;
-  const priorityCountTotal = sprints.filter(
-    (s) => s.priorityLevel === 'Alta' || sprintSystem(s).length > 0 && s.priorityLevel === 'Crítica'
-  ).length;
+  // Forecast data
+  const deliveryForecastData: DeliveryForecastWeek[] = [
+    { semana: '01–02', confirmadas: 3, risco: 0, meta: 3 },
+    { semana: '03–09', confirmadas: 4, risco: 1, meta: 5 },
+    { semana: '10–16', confirmadas: 5, risco: 1, meta: 6 },
+    { semana: '17–23', confirmadas: 4, risco: 2, meta: 5 },
+    { semana: '24–30', confirmadas: 3, risco: 1, meta: 4 },
+    { semana: '31', confirmadas: 2, risco: 0, meta: 2 },
+  ];
 
+  // Handler to open sprint in details modal
+  const handleOpenSprint = (sprint: Sprint | null | undefined) => {
+    if (sprint) {
+      setSelectedSprint(sprint);
+    } else {
+      // Open the first available sprint as representative
+      if (sprints.length > 0) {
+        setSelectedSprint(sprints[0]);
+      }
+    }
+  };
+
+  // Find the live sprint object if updated
   const currentModalSprint = selectedSprint
     ? sprints.find((s) => s.code === selectedSprint.code) || selectedSprint
     : null;
 
-  const hasActiveFilters =
-    selectedLane !== 'all' ||
-    selectedSystem !== 'all' ||
-    searchQuery.trim() !== '' ||
-    kpiFilter !== null;
-
-  function clearAllFilters() {
-    setSelectedLane('all');
-    setSelectedSystem('all');
-    setSearchQuery('');
-    setKpiFilter(null);
-  }
-
-  function handleKpiClick(filterKey: string) {
-    if (kpiFilter === filterKey) {
-      setKpiFilter(null);
-    } else {
-      setKpiFilter(filterKey);
-    }
-  }
-
   return (
-    <div className="super-container">
-      {/* 1. Header Status */}
-      <div className="super-header" style={{ marginBottom: 16 }}>
-        <div className="super-header__badge">
-          <span className="super-header__dot" />
-          <span>
-            {sprints.length} Sprints no portfólio · {systemsSummary.length} sistemas
-          </span>
-        </div>
-      </div>
-
-      {/* 2. Executive Decision KPIs Grid */}
-      <section className="super-kpis-grid" aria-label="Indicadores executivos">
-        {/* KPI 1: Em Desenvolvimento */}
-        <div
-          className={`super-kpi-card ${kpiFilter === 'development' ? 'is-active-filter' : ''}`}
-          onClick={() => handleKpiClick('development')}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleKpiClick('development')}
-          title="Clique para filtrar apenas Sprints em desenvolvimento"
-        >
-          <div className="super-kpi-icon blue">
-            <Layers size={22} />
-          </div>
-          <div className="super-kpi-content">
-            <small>Em Desenvolvimento</small>
-            <strong>{inDevelopmentCount}</strong>
-            <em>{systemsSummary.filter((s) => s.inProgress > 0).length} sistemas ativos</em>
-          </div>
-        </div>
-
-        {/* KPI 2: Com Bloqueios */}
-        <div
-          className={`super-kpi-card ${kpiFilter === 'blocked' ? 'is-active-filter' : ''}`}
-          onClick={() => handleKpiClick('blocked')}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleKpiClick('blocked')}
-          title="Clique para filtrar Sprints com bloqueios ou impedimentos"
-        >
-          <div className="super-kpi-icon orange">
-            <AlertTriangle size={22} />
-          </div>
-          <div className="super-kpi-content">
-            <small>Com Bloqueios</small>
-            <strong style={{ color: blockedCountTotal > 0 ? '#dc2626' : undefined }}>
-              {blockedCountTotal}
-            </strong>
-            <em className={blockedCountTotal > 0 ? 'alert' : ''}>
-              {blockedCountTotal > 0 ? 'Exigem decisão executiva' : 'Sem bloqueios ativos'}
-            </em>
-          </div>
-        </div>
-
-        {/* KPI 3: Entregas no Mês */}
-        <div
-          className={`super-kpi-card ${kpiFilter === 'completed' ? 'is-active-filter' : ''}`}
-          onClick={() => handleKpiClick('completed')}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleKpiClick('completed')}
-          title="Clique para filtrar entregas homologadas ou faturadas"
-        >
-          <div className="super-kpi-icon green">
-            <CheckCircle2 size={22} />
-          </div>
-          <div className="super-kpi-content">
-            <small>Entregas no Mês</small>
-            <strong>{monthlyDeliveriesCount}</strong>
-            <em className="success">{weeklyDeliveriesCount} na última semana</em>
-          </div>
-        </div>
-
-        {/* KPI 4: Itens Prioritários */}
-        <div
-          className={`super-kpi-card ${kpiFilter === 'priorities' ? 'is-active-filter' : ''}`}
-          onClick={() => handleKpiClick('priorities')}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleKpiClick('priorities')}
-          title="Clique para filtrar itens de prioridade Alta ou Crítica"
-        >
-          <div className="super-kpi-icon purple">
-            <Zap size={22} />
-          </div>
-          <div className="super-kpi-content">
-            <small>Itens Prioritários</small>
-            <strong>{priorityCountTotal}</strong>
-            <em>Prioridade Alta ou Crítica</em>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Filter Toolbar */}
-      <section className="super-filter-toolbar" aria-label="Barra de filtros">
-        <div className="super-filter-group">
-          {/* Search Input */}
-          <div className="super-filter-search">
-            <Search size={15} />
-            <input
-              type="text"
-              placeholder="Buscar sistema, Sprint, PO ou objetivo…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Buscar no painel"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                style={{ background: 'none', border: 0, cursor: 'pointer', color: '#94a3b8' }}
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-
-          {/* Lane Filter */}
-          <select
-            className="super-filter-select"
-            value={selectedLane}
-            onChange={(e) => setSelectedLane(e.target.value)}
-            aria-label="Filtrar por etapa do fluxo"
-          >
-            <option value="all">Todas as etapas</option>
-            {LANES.map((lane) => (
-              <option key={lane.id} value={lane.id}>
-                {lane.label}
-              </option>
-            ))}
-            <option value="blocked">Com bloqueios</option>
-          </select>
-
-          {/* System Filter */}
-          <select
-            className="super-filter-select"
-            value={selectedSystem}
-            onChange={(e) => setSelectedSystem(e.target.value)}
-            aria-label="Filtrar por sistema"
-          >
-            <option value="all">Todos os sistemas</option>
-            {systemsSummary.map((sys) => (
-              <option key={sys.name} value={sys.name}>
-                {sys.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Clear filters action */}
-        {hasActiveFilters && (
-          <button
-            type="button"
-            className="super-filter-clear-btn"
-            onClick={clearAllFilters}
-          >
-            <X size={13} />
-            Limpar filtros
-          </button>
-        )}
-      </section>
-
-      {/* 4. Top Main Layout: System Cards Grid (Left) + Leitura Executiva / Destaques (Right) */}
-      <div className="super-main-layout">
-        <div className="super-systems-container">
-          <SuperSystemCards
-            systems={systemsSummary}
-            selectedSystem={selectedSystem}
-            onSelectSystem={setSelectedSystem}
-          />
-        </div>
-
-        <SuperExecutiveSidebar
-          blockedSprints={blockedSprintsList}
-          featuredSprints={featuredSprintsList}
-          getSystemColor={getSystemColor}
-          onOpenSprint={(sprint) => setSelectedSprint(sprint)}
-        />
-      </div>
-
-      {/* 5. Consolidated System Tracking Table */}
-      <SuperSystemTable
-        rows={systemTableRows}
-        onOpenSprint={(sprint) => setSelectedSprint(sprint)}
+    <div className="super-exec-dashboard">
+      {/* 1. Header Executivo Horizontal */}
+      <DashboardHeader
+        selectedPeriod={selectedPeriod}
+        onPeriodChange={setSelectedPeriod}
+        selectedVision={selectedVision}
+        onVisionChange={setSelectedVision}
+        selectedSystem={selectedSystem}
+        onSystemChange={setSelectedSystem}
+        systems={systemOptions}
+        lastUpdatedText="05/08/2026 10:24"
       />
 
-      {/* 6. Bottom Layout: Deliveries Chart & Drilldown (Left) + Distribution (Right) */}
-      <div className="super-bottom-layout">
-        <SuperDeliveriesChart
-          deliveryEvents={deliveryEvents}
-          weeklyDeliveriesCount={weeklyDeliveriesCount}
-          monthlyDeliveriesCount={monthlyDeliveriesCount}
-          totalDeliveredPf={totalDeliveredPf}
-          onOpenSprint={(sprint) => setSelectedSprint(sprint)}
+      {/* 2. Primeira Linha: 5 KPIs Executivos */}
+      <section className="super-exec-kpis-grid" aria-label="KPIs Executivos">
+        {/* KPI 01 — Times Ativos */}
+        <ExecutiveKpiCard
+          title="Times Ativos"
+          value="12"
+          icon={<GroupsOutlinedIcon sx={{ fontSize: 20 }} />}
+          iconBg="#DBEAFE"
+          iconColor="#2563EB"
+          comparison={{
+            text: '↑ +2',
+            subtext: 'vs. mês anterior',
+            isPositive: true,
+          }}
+          footer="Com melhorias em execução"
+          isActive={kpiFilter === 'development'}
+          onClick={() => setKpiFilter(kpiFilter === 'development' ? null : 'development')}
         />
 
-        <SuperPortfolioDistribution
-          distribution={portfolioDistribution}
-          totalSprints={filteredSprints.length}
-          selectedLane={selectedLane}
-          onSelectLane={setSelectedLane}
+        {/* KPI 02 — Entregas no Mês */}
+        <ExecutiveKpiCard
+          title="Entregas no Mês"
+          value="18"
+          icon={<CheckCircleOutlinedIcon sx={{ fontSize: 20 }} />}
+          iconBg="#DCFCE7"
+          iconColor="#16A34A"
+          comparison={{
+            text: '↑ +20%',
+            subtext: 'vs. junho/2026',
+            isPositive: true,
+          }}
+          footer="Melhorias e demandas concluídas"
+          isActive={kpiFilter === 'completed'}
+          onClick={() => setKpiFilter(kpiFilter === 'completed' ? null : 'completed')}
         />
-      </div>
 
-      {/* 7. Interactive Sprint Details Modal */}
+        {/* KPI 03 — Previsão do Próximo Mês */}
+        <ExecutiveKpiCard
+          title="Previsão do Próximo Mês"
+          value="10"
+          icon={<EventAvailableOutlinedIcon sx={{ fontSize: 20 }} />}
+          iconBg="#EFF6FF"
+          iconColor="#2563EB"
+          footer="8 no prazo • 2 em risco"
+        />
+
+        {/* KPI 04 — Decisões Pendentes */}
+        <ExecutiveKpiCard
+          title="Decisões Pendentes"
+          value="2"
+          icon={<WarningAmberRoundedIcon sx={{ fontSize: 20 }} />}
+          iconBg="#FEF3C7"
+          iconColor="#F59E0B"
+          comparison={{
+            text: '↓ -50%',
+            subtext: 'vs. mês anterior',
+            isPositive: true,
+          }}
+          footer="Aguardando definição do cliente"
+          isActive={kpiFilter === 'blocked'}
+          onClick={() => setKpiFilter(kpiFilter === 'blocked' ? null : 'blocked')}
+        />
+
+        {/* KPI 05 — Contrato Consumido */}
+        <ContractConsumptionCard
+          consumedPf="7.469,04 PF"
+          consumedPercentage={68}
+          remainingPf="3.530,96 PF"
+          ceilingPf="11.000 PF"
+          periodRange="Outubro de 2025 a Julho de 2026"
+        />
+      </section>
+
+      {/* 3. Área Central: Pipeline de Projetos (65-70%) + Decisões & Sustentação (30-35%) */}
+      <section className="super-exec-middle-grid" aria-label="Iniciativas e Decisões">
+        {/* Pipeline de Projetos */}
+        <ProjectPipeline
+          projects={pipelineProjects}
+          onSelectProject={(proj) => handleOpenSprint(proj.sprintRef)}
+          onViewAll={() => setSelectedVision('all')}
+        />
+
+        {/* Coluna Direita: Decisões e Destaques + Sustentação */}
+        <div className="super-exec-right-rail">
+          <DecisionsHighlights
+            items={decisionItems}
+            onSelectItem={(item) => handleOpenSprint(item.sprintRef)}
+            onViewAll={() => setSelectedVision('critical')}
+          />
+
+          <SupportSummary
+            stats={{
+              openCount: 14,
+              criticalCount: 2,
+              slaPercentage: 96,
+              resolvedCount: 42,
+              periodLabel: 'Julho/2026',
+            }}
+          />
+        </div>
+      </section>
+
+      {/* 4. Linha Inferior: 4 Gráficos Analíticos */}
+      <section className="super-exec-charts-grid" aria-label="Gráficos Analíticos">
+        <DeliveriesBySystemChart
+          data={deliveriesBySystemData}
+          periodSubtitle="Melhorias entregues em julho de 2026"
+        />
+
+        <DeliveryForecastChart
+          data={deliveryForecastData}
+          subtitle="Compromissos por semana • Agosto de 2026"
+        />
+
+        <PortfolioStatusChart
+          data={portfolioStatusData}
+          totalProjects={12}
+        />
+
+        <SprintsBySystemChart
+          data={sprintsBySystemData}
+        />
+      </section>
+
+      {/* 5. Modal de Detalhes da Sprint Integrado */}
       {currentModalSprint && (
         <SprintDetailsModal
           sprint={currentModalSprint}
@@ -502,3 +511,4 @@ export function SuperintendencePage() {
     </div>
   );
 }
+export default SuperintendencePage;

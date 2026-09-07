@@ -1474,3 +1474,82 @@
     display: none;
   }
 }
+
+/* ==========================================================================
+   DASHBOARD EXECUTIVO SUFRAMA (Diretoria / CEO)
+   ========================================================================== */
+
+.super-exec-dashboard {
+  background-color: #F7F9FC;
+  min-height: calc(100vh - 64px);
+  padding: 20px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #0F2747;
+}
+
+/* Linha 1: 5 KPIs Executivos */
+.super-exec-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) 1.25fr;
+  gap: 12px;
+}
+
+@media (max-width: 1400px) {
+  .super-exec-kpis-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .super-exec-kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .super-exec-kpis-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Linha 2: Pipeline de Projetos (65-70%) + Decisões / Sustentação (30-35%) */
+.super-exec-middle-grid {
+  display: grid;
+  grid-template-columns: 1.95fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.super-exec-right-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 1180px) {
+  .super-exec-middle-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Linha 3: 4 Cards de Gráficos Analíticos */
+.super-exec-charts-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1.25fr 0.85fr 1.1fr;
+  gap: 12px;
+}
+
+@media (max-width: 1440px) {
+  .super-exec-charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .super-exec-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

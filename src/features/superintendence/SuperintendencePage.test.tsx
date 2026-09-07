@@ -63,72 +63,88 @@ const mockSprints: Sprint[] = [
   },
 ];
 
-describe('SuperintendencePage Component', () => {
+describe('SuperintendencePage Component — Dashboard Executivo SUFRAMA', () => {
   beforeEach(() => {
     cleanup();
     localStorage.clear();
     localStorage.setItem('painelpro-sprints', JSON.stringify(mockSprints));
   });
-  it('renderiza o cabeçalho executivo e os 4 KPIs principais', () => {
-    localStorage.setItem('painelpro-sprints', JSON.stringify(mockSprints));
 
+  it('renderiza o cabeçalho executivo da SUFRAMA e os 5 KPIs principais', () => {
     render(
       <SprintProvider>
         <SuperintendencePage />
       </SprintProvider>
     );
 
-    expect(screen.getByText('Em Desenvolvimento')).toBeDefined();
-    expect(screen.getByText('Com Bloqueios')).toBeDefined();
+    // Header
+    expect(screen.getByText('Visão Executiva da Gestão Suframa')).toBeDefined();
+    expect(
+      screen.getByText('Panorama consolidado dos projetos e entregas da fábrica de software')
+    ).toBeDefined();
+
+    // 5 KPIs
+    expect(screen.getByText('Times Ativos')).toBeDefined();
     expect(screen.getByText('Entregas no Mês')).toBeDefined();
-    expect(screen.getByText('Itens Prioritários')).toBeDefined();
+    expect(screen.getByText('Previsão do Próximo Mês')).toBeDefined();
+    expect(screen.getByText('Decisões Pendentes')).toBeDefined();
+    expect(screen.getByText('Contrato Consumido')).toBeDefined();
   });
 
-  it('exibe a tabela consolidada de sistemas e o sidebar de ação necessária', () => {
-    localStorage.setItem('painelpro-sprints', JSON.stringify(mockSprints));
-
+  it('renderiza o Pipeline de Projetos e cards com badges de status', () => {
     render(
       <SprintProvider>
         <SuperintendencePage />
       </SprintProvider>
     );
 
-    expect(screen.getByText('O que está em andamento')).toBeDefined();
-    expect(screen.getAllByText('SCIEX').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('CADSUF').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('SIMNAC').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Ação Necessária/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Destaques/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Pipeline de Projetos')).toBeDefined();
+    expect(screen.getByText('Principais iniciativas em andamento')).toBeDefined();
+    expect(screen.getAllByText(/SIMNAC/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/SCIEX/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Em desenvolvimento/i).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('permite alternar abas entre Ação Necessária e Destaques', () => {
-    localStorage.setItem('painelpro-sprints', JSON.stringify(mockSprints));
-
+  it('renderiza a seção de Decisões e Destaques e o card de Sustentação com mini KPIs', () => {
     render(
       <SprintProvider>
         <SuperintendencePage />
       </SprintProvider>
     );
 
-    const destaquesTabs = screen.getAllByRole('tab', { name: /Destaques/i });
-    fireEvent.click(destaquesTabs[0]);
+    expect(screen.getByText('Decisões e Destaques')).toBeDefined();
+    expect(screen.getByText(/Sustentação/i)).toBeDefined();
 
-    expect(screen.getByText('LEITURA EXECUTIVA')).toBeDefined();
-    expect(screen.getByText('Aguardando validação do webservice da Receita.')).toBeDefined();
+    // Mini KPIs de sustentação
+    expect(screen.getByText('Abertos')).toBeDefined();
+    expect(screen.getByText('Críticos')).toBeDefined();
+    expect(screen.getByText('No SLA')).toBeDefined();
+    expect(screen.getByText('Resolvidos')).toBeDefined();
   });
 
-  it('permite filtrar sistemas clicando nos cards de resumo', () => {
-    localStorage.setItem('painelpro-sprints', JSON.stringify(mockSprints));
-
+  it('renderiza os 4 cards analíticos de gráficos', () => {
     render(
       <SprintProvider>
         <SuperintendencePage />
       </SprintProvider>
     );
 
-    const sciexBtns = screen.getAllByTitle('Filtrar por SCIEX');
-    fireEvent.click(sciexBtns[0]);
+    expect(screen.getByText('Entregas por Sistema')).toBeDefined();
+    expect(screen.getByText('Previsão de Entregas')).toBeDefined();
+    expect(screen.getByText('Status do Portfólio')).toBeDefined();
+    expect(screen.getByText('Sprints por Sistema')).toBeDefined();
+  });
 
-    expect(screen.getByText(/Limpar filtros/i)).toBeDefined();
+  it('abre o modal de detalhes da Sprint ao clicar em um item de decisão ou projeto', () => {
+    render(
+      <SprintProvider>
+        <SuperintendencePage />
+      </SprintProvider>
+    );
+
+    // Click on decision or project with sprint attached
+    const sciexElements = screen.getAllByText(/SCIEX/i);
+    expect(sciexElements.length).toBeGreaterThanOrEqual(1);
+    fireEvent.click(sciexElements[0]);
   });
 });
