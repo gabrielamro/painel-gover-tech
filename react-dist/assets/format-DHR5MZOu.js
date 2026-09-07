@@ -1,0 +1,1 @@
+function e(e){return new Intl.NumberFormat(`pt-BR`,{maximumFractionDigits:2}).format(Math.round((Number(e)+2**-52)*100)/100)}export{e as t};

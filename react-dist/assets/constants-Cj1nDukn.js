@@ -1,0 +1,1 @@
+var e=[{id:`planning`,label:`Em planejamento`},{id:`planned`,label:`Planejado`},{id:`development`,label:`Em desenvolvimento`},{id:`homologation`,label:`Em homologação`},{id:`approved`,label:`Homologado`},{id:`billing`,label:`Aguardando faturamento`},{id:`completed`,label:`Faturado`}];export{e as t};
