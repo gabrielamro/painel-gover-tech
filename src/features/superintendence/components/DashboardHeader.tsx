@@ -1,28 +1,25 @@
 import React from 'react';
-import { Box, Typography, Select, MenuItem, FormControl } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import { SuframaLogo } from './SuframaLogo';
 
 interface DashboardHeaderProps {
-  selectedPeriod: string;
-  onPeriodChange: (period: string) => void;
-  selectedVision: string;
-  onVisionChange: (vision: string) => void;
-  selectedSystem: string;
-  onSystemChange: (system: string) => void;
-  systems: string[];
+  selectedPeriod?: string;
+  onPeriodChange?: (period: string) => void;
+  selectedVision?: string;
+  onVisionChange?: (vision: string) => void;
+  selectedSystem?: string;
+  onSystemChange?: (system: string) => void;
+  systems?: string[];
   lastUpdatedText?: string;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
-  selectedPeriod,
-  onPeriodChange,
-  selectedVision,
-  onVisionChange,
-  selectedSystem,
-  onSystemChange,
-  systems,
+  selectedPeriod = 'Julho de 2026',
+  selectedVision = 'Todos os projetos',
+  selectedSystem = 'Todos os sistemas',
   lastUpdatedText = '05/08/2026 10:24',
 }) => {
   return (
@@ -33,38 +30,20 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: '16px',
-        paddingBottom: '16px',
-        borderBottom: '1px solid #E5EAF2',
-        marginBottom: '16px',
+        paddingBottom: '4px',
       }}
     >
-      {/* Left side: Branding / Title */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <Box
-          sx={{
-            width: 38,
-            height: 38,
-            borderRadius: '8px',
-            backgroundColor: '#0F2747',
-            color: '#FFFFFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 700,
-            fontSize: '0.875rem',
-            letterSpacing: '0.05em',
-            flexShrink: 0,
-          }}
-        >
-          SUF
-        </Box>
-        <Box>
+      {/* Left side: Logo + Title + Subtitle */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <SuframaLogo />
+
+        <Box sx={{ borderLeft: '1px solid #E2E8F0', paddingLeft: '16px' }}>
           <Typography
             component="h1"
             sx={{
               fontSize: '1.25rem',
               fontWeight: 700,
-              color: '#0F2747',
+              color: '#0F172A',
               lineHeight: 1.2,
             }}
           >
@@ -75,7 +54,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             sx={{
               fontSize: '0.8125rem',
               color: '#64748B',
-              marginTop: '2px',
+              marginTop: '3px',
               lineHeight: 1.2,
             }}
           >
@@ -84,164 +63,116 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </Box>
       </Box>
 
-      {/* Right side: Compact Filters & Updated Tag */}
+      {/* Right side: 4 Two-row Filters */}
       <Box
         sx={{
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
-          gap: '10px',
+          gap: '8px',
         }}
       >
-        {/* Period Filter */}
+        {/* Box 1: Período */}
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
             backgroundColor: '#FFFFFF',
-            border: '1px solid #E5EAF2',
+            border: '1px solid #E2E8F0',
             borderRadius: '8px',
-            padding: '2px 8px',
-            height: '34px',
+            padding: '4px 10px',
+            gap: '8px',
+            cursor: 'pointer',
+            height: '42px',
+            '&:hover': { borderColor: '#CBD5E1' },
           }}
         >
-          <CalendarMonthOutlinedIcon
-            sx={{ fontSize: 16, color: '#64748B', marginRight: '6px' }}
-          />
-          <FormControl size="small" variant="standard">
-            <Select
-              value={selectedPeriod}
-              onChange={(e) => onPeriodChange(e.target.value)}
-              disableUnderline
-              IconComponent={KeyboardArrowDownIcon}
-              sx={{
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-                color: '#0F2747',
-                '& .MuiSelect-select': {
-                  paddingRight: '22px !important',
-                  paddingY: 0,
-                },
-                '& .MuiSvgIcon-root': {
-                  color: '#64748B',
-                  fontSize: 18,
-                  right: 0,
-                },
-              }}
-            >
-              <MenuItem value="Julho de 2026">Julho de 2026</MenuItem>
-              <MenuItem value="Agosto de 2026">Agosto de 2026</MenuItem>
-              <MenuItem value="Setembro de 2026">Setembro de 2026</MenuItem>
-            </Select>
-          </FormControl>
+          <CalendarMonthOutlinedIcon sx={{ fontSize: 16, color: '#64748B' }} />
+          <Box>
+            <Typography sx={{ fontSize: '0.625rem', color: '#94A3B8', lineHeight: 1 }}>
+              Período
+            </Typography>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#0F172A', lineHeight: 1.3 }}>
+              {selectedPeriod}
+            </Typography>
+          </Box>
+          <KeyboardArrowDownIcon sx={{ fontSize: 16, color: '#64748B' }} />
         </Box>
 
-        {/* Vision Filter */}
+        {/* Box 2: Visão */}
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
             backgroundColor: '#FFFFFF',
-            border: '1px solid #E5EAF2',
+            border: '1px solid #E2E8F0',
             borderRadius: '8px',
-            padding: '2px 8px',
-            height: '34px',
+            padding: '4px 10px',
+            gap: '8px',
+            cursor: 'pointer',
+            height: '42px',
+            '&:hover': { borderColor: '#CBD5E1' },
           }}
         >
-          <FormControl size="small" variant="standard">
-            <Select
-              value={selectedVision}
-              onChange={(e) => onVisionChange(e.target.value)}
-              disableUnderline
-              IconComponent={KeyboardArrowDownIcon}
-              sx={{
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-                color: '#0F2747',
-                '& .MuiSelect-select': {
-                  paddingRight: '22px !important',
-                  paddingY: 0,
-                },
-                '& .MuiSvgIcon-root': {
-                  color: '#64748B',
-                  fontSize: 18,
-                  right: 0,
-                },
-              }}
-            >
-              <MenuItem value="all">Todos os projetos</MenuItem>
-              <MenuItem value="critical">Projetos críticos / em risco</MenuItem>
-              <MenuItem value="active">Projetos em andamento</MenuItem>
-            </Select>
-          </FormControl>
+          <Box>
+            <Typography sx={{ fontSize: '0.625rem', color: '#94A3B8', lineHeight: 1 }}>
+              Visão
+            </Typography>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#0F172A', lineHeight: 1.3 }}>
+              {selectedVision}
+            </Typography>
+          </Box>
+          <KeyboardArrowDownIcon sx={{ fontSize: 16, color: '#64748B' }} />
         </Box>
 
-        {/* System Filter */}
+        {/* Box 3: Sistema */}
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
             backgroundColor: '#FFFFFF',
-            border: '1px solid #E5EAF2',
+            border: '1px solid #E2E8F0',
             borderRadius: '8px',
-            padding: '2px 8px',
-            height: '34px',
+            padding: '4px 10px',
+            gap: '8px',
+            cursor: 'pointer',
+            height: '42px',
+            '&:hover': { borderColor: '#CBD5E1' },
           }}
         >
-          <FormControl size="small" variant="standard">
-            <Select
-              value={selectedSystem}
-              onChange={(e) => onSystemChange(e.target.value)}
-              disableUnderline
-              IconComponent={KeyboardArrowDownIcon}
-              sx={{
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-                color: '#0F2747',
-                '& .MuiSelect-select': {
-                  paddingRight: '22px !important',
-                  paddingY: 0,
-                },
-                '& .MuiSvgIcon-root': {
-                  color: '#64748B',
-                  fontSize: 18,
-                  right: 0,
-                },
-              }}
-            >
-              <MenuItem value="all">Todos os sistemas</MenuItem>
-              {systems.map((sys) => (
-                <MenuItem key={sys} value={sys}>
-                  {sys}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Box>
+            <Typography sx={{ fontSize: '0.625rem', color: '#94A3B8', lineHeight: 1 }}>
+              Sistema
+            </Typography>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#0F172A', lineHeight: 1.3 }}>
+              {selectedSystem}
+            </Typography>
+          </Box>
+          <KeyboardArrowDownIcon sx={{ fontSize: 16, color: '#64748B' }} />
         </Box>
 
-        {/* Updated Time Badge */}
+        {/* Box 4: Atualizado em */}
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
             backgroundColor: '#FFFFFF',
-            border: '1px solid #E5EAF2',
+            border: '1px solid #E2E8F0',
             borderRadius: '8px',
-            padding: '6px 10px',
-            height: '34px',
+            padding: '4px 10px',
+            gap: '8px',
+            height: '42px',
           }}
         >
           <FiberManualRecordIcon sx={{ fontSize: 9, color: '#16A34A' }} />
-          <Typography
-            sx={{
-              fontSize: '0.75rem',
-              color: '#64748B',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Atualizado em {lastUpdatedText}
-          </Typography>
+          <Box>
+            <Typography sx={{ fontSize: '0.625rem', color: '#94A3B8', lineHeight: 1 }}>
+              Atualizado em
+            </Typography>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#0F172A', lineHeight: 1.3 }}>
+              {lastUpdatedText}
+            </Typography>
+          </Box>
         </Box>
       </Box>
     </Box>

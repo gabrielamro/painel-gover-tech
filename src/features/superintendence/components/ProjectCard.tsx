@@ -24,75 +24,64 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
       }}
       sx={{
         backgroundColor: '#FFFFFF',
-        border: '1px solid #E5EAF2',
+        border: '1px solid #E2E8F0',
         borderRadius: '8px',
-        padding: '12px',
+        padding: '12px 14px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         cursor: 'pointer',
-        transition: 'border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease',
+        minHeight: '128px',
+        transition: 'all 0.2s ease',
         '&:hover': {
           borderColor: '#93C5FD',
+          boxShadow: '0 2px 8px rgba(37, 99, 235, 0.06)',
           transform: 'translateY(-1px)',
-          boxShadow: '0 2px 6px rgba(37, 99, 235, 0.06)',
         },
       }}
     >
-      {/* Top Header: System/Subsystem & Badge */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '8px',
-          marginBottom: '6px',
-        }}
-      >
+      {/* Top Header: System / Subsystem */}
+      <Box sx={{ marginBottom: '4px' }}>
         <Typography
           sx={{
-            fontSize: '0.75rem',
+            fontSize: '0.8125rem',
             fontWeight: 700,
-            color: '#2563EB',
-            letterSpacing: '0.01em',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            color: '#0F172A',
+            lineHeight: 1.2,
           }}
         >
           {project.system}
           {project.subsystem ? ` / ${project.subsystem}` : ''}
         </Typography>
 
+        {/* Initiative description */}
+        <Typography
+          sx={{
+            fontSize: '0.75rem',
+            color: '#64748B',
+            lineHeight: 1.3,
+            marginTop: '3px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+          title={project.title}
+        >
+          {project.title}
+        </Typography>
+      </Box>
+
+      {/* Badge Line */}
+      <Box sx={{ marginY: '6px' }}>
         <ProjectStatusBadge status={project.status} />
       </Box>
 
-      {/* Main Initiative Title / Objective */}
-      <Typography
-        sx={{
-          fontSize: '0.8125rem',
-          fontWeight: 600,
-          color: '#0F2747',
-          lineHeight: 1.3,
-          marginBottom: '10px',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          minHeight: '34px',
-        }}
-        title={project.title}
-      >
-        {project.title}
-      </Typography>
-
-      {/* Bottom Row: Delivery Date & Deadline Indicator */}
+      {/* Bottom Row: Delivery Date & Deadline Status */}
       <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderTop: '1px solid #F1F5F9',
           paddingTop: '6px',
         }}
       >

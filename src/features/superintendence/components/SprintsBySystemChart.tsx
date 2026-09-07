@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined';
 import {
   ResponsiveContainer,
@@ -9,18 +9,24 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   LabelList,
 } from 'recharts';
 import { DashboardCard } from './DashboardCard';
 import { CustomTooltip } from './CustomTooltip';
-import type { SystemSprintsData } from '../types';
 
-interface SprintsBySystemChartProps {
-  data?: SystemSprintsData[];
+interface SystemSprintItem {
+  sistema: string;
+  entregues: number;
+  emAndamento: number;
+  total: number;
 }
 
-const DEFAULT_SPRINTS_DATA: SystemSprintsData[] = [
+interface SprintsBySystemChartProps {
+  data?: SystemSprintItem[];
+  onViewDetails?: () => void;
+}
+
+const DEFAULT_SPRINTS_DATA: SystemSprintItem[] = [
   { sistema: 'SCIEX', entregues: 4, emAndamento: 3, total: 7 },
   { sistema: 'SIMNAC', entregues: 4, emAndamento: 2, total: 6 },
   { sistema: 'SPR', entregues: 3, emAndamento: 3, total: 6 },
@@ -30,83 +36,115 @@ const DEFAULT_SPRINTS_DATA: SystemSprintsData[] = [
 
 export const SprintsBySystemChart: React.FC<SprintsBySystemChartProps> = ({
   data = DEFAULT_SPRINTS_DATA,
+  onViewDetails,
 }) => {
-  // Ensure total is present
-  const chartData = React.useMemo(() => {
-    return data.map((d) => ({
-      ...d,
-      total: d.total || d.entregues + d.emAndamento,
-    }));
-  }, [data]);
+  const headerAction = (
+    <Typography
+      onClick={onViewDetails}
+      sx={{
+        fontSize: '0.75rem',
+        fontWeight: 600,
+        color: '#2563EB',
+        cursor: 'pointer',
+        '&:hover': { textDecoration: 'underline' },
+      }}
+    >
+      Ver detalhes →
+    </Typography>
+  );
 
   return (
     <DashboardCard
       title="Sprints por Sistema"
       subtitle="Entregues vs. Em andamento"
       icon={<BoltOutlinedIcon sx={{ fontSize: 20 }} />}
+      headerAction={headerAction}
     >
-      <Box sx={{ width: '100%', height: 220, marginTop: '8px' }}>
+      {/* Top Legend */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          marginTop: '2px',
+          marginBottom: '6px',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <Box sx={{ width: 8, height: 8, borderRadius: '2px', backgroundColor: '#2563EB' }} />
+          <Typography sx={{ fontSize: '0.6875rem', color: '#64748B' }}>
+            Sprints Entregues
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <Box sx={{ width: 8, height: 8, borderRadius: '2px', backgroundColor: '#93C5FD' }} />
+          <Typography sx={{ fontSize: '0.6875rem', color: '#64748B' }}>
+            Em Andamento
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Chart Canvas */}
+      <Box sx={{ width: '100%', height: 185 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={chartData}
+            data={data}
             layout="vertical"
-            margin={{ top: 10, right: 30, left: 10, bottom: 0 }}
+            margin={{ top: 5, right: 30, left: 10, bottom: 0 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
               horizontal={false}
-              stroke="#EEF2F7"
+              stroke="#F1F5F9"
             />
             <XAxis
               type="number"
+              domain={[0, 8]}
+              ticks={[0, 2, 4, 6, 8]}
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: '#64748B' }}
-              allowDecimals={false}
+              tick={{ fontSize: 11, fill: '#94A3B8' }}
             />
             <YAxis
               type="category"
               dataKey="sistema"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: '#0F2747', fontWeight: 600 }}
+              tick={{ fontSize: 11, fill: '#0F172A', fontWeight: 600 }}
               width={65}
             />
-            <Tooltip
-              content={
-                <CustomTooltip
-                  valueFormatter={(v) => `${v} sprints`}
-                />
-              }
-            />
-            <Legend
-              iconType="circle"
-              iconSize={8}
-              wrapperStyle={{
-                fontSize: '0.6875rem',
-                paddingTop: '6px',
-                color: '#64748B',
-              }}
-            />
+            <Tooltip content={<CustomTooltip valueFormatter={(v) => `${v} sprints`} />} />
             <Bar
               dataKey="entregues"
-              name="Sprints Entregues"
+              name="Entregues"
               stackId="sprints"
-              fill="#1E40AF"
-              barSize={16}
-            />
+              fill="#2563EB"
+              barSize={14}
+            >
+              <LabelList
+                dataKey="entregues"
+                position="center"
+                style={{ fontSize: 10, fill: '#FFFFFF', fontWeight: 600 }}
+              />
+            </Bar>
             <Bar
               dataKey="emAndamento"
               name="Em Andamento"
               stackId="sprints"
               fill="#93C5FD"
-              barSize={16}
+              barSize={14}
               radius={[0, 4, 4, 0]}
             >
               <LabelList
+                dataKey="emAndamento"
+                position="center"
+                style={{ fontSize: 10, fill: '#1E3A8A', fontWeight: 600 }}
+              />
+              <LabelList
                 dataKey="total"
                 position="right"
-                style={{ fontSize: 11, fill: '#64748B', fontWeight: 600 }}
+                style={{ fontSize: 11, fill: '#0F172A', fontWeight: 600 }}
               />
             </Bar>
           </BarChart>

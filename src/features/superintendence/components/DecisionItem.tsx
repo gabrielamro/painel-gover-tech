@@ -16,21 +16,21 @@ export const DecisionItem: React.FC<DecisionItemProps> = ({ item, onClick }) => 
     switch (item.severity) {
       case 'critical':
         return {
-          icon: <ReportProblemOutlinedIcon sx={{ fontSize: 16 }} />,
+          icon: <ReportProblemOutlinedIcon sx={{ fontSize: 18 }} />,
           bg: '#FEE2E2',
           color: '#EF4444',
         };
       case 'warning':
         return {
-          icon: <WarningAmberRoundedIcon sx={{ fontSize: 16 }} />,
+          icon: <WarningAmberRoundedIcon sx={{ fontSize: 18 }} />,
           bg: '#FEF3C7',
           color: '#F59E0B',
         };
       case 'info':
       default:
         return {
-          icon: <InfoOutlinedIcon sx={{ fontSize: 16 }} />,
-          bg: '#DBEAFE',
+          icon: <InfoOutlinedIcon sx={{ fontSize: 18 }} />,
+          bg: '#EFF6FF',
           color: '#2563EB',
         };
     }
@@ -53,23 +53,25 @@ export const DecisionItem: React.FC<DecisionItemProps> = ({ item, onClick }) => 
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '8px 10px',
-        borderRadius: '6px',
-        backgroundColor: '#F8FAFC',
-        border: '1px solid #E5EAF2',
+        padding: '10px 6px',
+        borderRadius: '8px',
         cursor: 'pointer',
-        transition: 'background-color 0.15s ease, border-color 0.15s ease',
+        transition: 'background-color 0.15s ease',
+        borderBottom: '1px solid #F1F5F9',
+        '&:last-child': {
+          borderBottom: 'none',
+        },
         '&:hover': {
-          backgroundColor: '#EFF6FF',
-          borderColor: '#BFDBFE',
+          backgroundColor: '#F8FAFC',
         },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: '8px', minWidth: 0 }}>
+      {/* Left: Icon + Content */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
         <Box
           sx={{
-            width: 26,
-            height: 26,
+            width: 36,
+            height: 36,
             borderRadius: '50%',
             backgroundColor: iconConfig.bg,
             color: iconConfig.color,
@@ -77,43 +79,28 @@ export const DecisionItem: React.FC<DecisionItemProps> = ({ item, onClick }) => 
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            marginTop: '2px',
           }}
         >
           {iconConfig.icon}
         </Box>
 
         <Box sx={{ minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <Typography
-              sx={{
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                color: '#0F2747',
-                lineHeight: 1.2,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {item.title}
-            </Typography>
-            {item.date && (
-              <Typography
-                sx={{
-                  fontSize: '0.6875rem',
-                  color: '#94A3B8',
-                  lineHeight: 1,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {item.date}
-              </Typography>
-            )}
-          </Box>
           <Typography
             sx={{
-              fontSize: '0.6875rem',
+              fontSize: '0.8125rem',
+              fontWeight: 700,
+              color: '#0F172A',
+              lineHeight: 1.2,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {item.title}
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
               color: '#64748B',
               lineHeight: 1.3,
               marginTop: '2px',
@@ -128,14 +115,26 @@ export const DecisionItem: React.FC<DecisionItemProps> = ({ item, onClick }) => 
         </Box>
       </Box>
 
-      <ChevronRightRoundedIcon
-        sx={{
-          fontSize: 16,
-          color: '#94A3B8',
-          flexShrink: 0,
-          marginLeft: '4px',
-        }}
-      />
+      {/* Right: Date + Chevron */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, marginLeft: '12px' }}>
+        {item.date && (
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              color: '#64748B',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {item.date}
+          </Typography>
+        )}
+        <ChevronRightRoundedIcon
+          sx={{
+            fontSize: 18,
+            color: '#94A3B8',
+          }}
+        />
+      </Box>
     </Box>
   );
 };

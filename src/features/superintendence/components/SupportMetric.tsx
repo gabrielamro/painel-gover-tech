@@ -19,22 +19,22 @@ export const SupportMetric: React.FC<SupportMetricProps> = ({
   return (
     <Box
       sx={{
-        backgroundColor: '#F8FAFC',
-        border: '1px solid #E5EAF2',
+        backgroundColor: '#FFFFFF',
+        border: '1px solid #E2E8F0',
         borderRadius: '8px',
-        padding: '8px 10px',
+        padding: '10px 12px',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        gap: '10px',
         flex: 1,
         minWidth: 0,
       }}
     >
       <Box
         sx={{
-          width: 30,
-          height: 30,
-          borderRadius: '50%',
+          width: 36,
+          height: 36,
+          borderRadius: '8px',
           backgroundColor: iconBg,
           color: iconColor,
           display: 'flex',
@@ -49,9 +49,9 @@ export const SupportMetric: React.FC<SupportMetricProps> = ({
       <Box sx={{ minWidth: 0 }}>
         <Typography
           sx={{
-            fontSize: '1rem',
+            fontSize: '1.25rem',
             fontWeight: 700,
-            color: '#0F2747',
+            color: '#0F172A',
             lineHeight: 1.1,
           }}
         >

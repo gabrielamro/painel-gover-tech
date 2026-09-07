@@ -1,7 +1,6 @@
 import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { DashboardCard } from './DashboardCard';
 import { ProjectCard } from './ProjectCard';
 import type { PipelineProject } from '../types';
@@ -17,26 +16,20 @@ export const ProjectPipeline: React.FC<ProjectPipelineProps> = ({
   onSelectProject,
   onViewAll,
 }) => {
-  const headerAction = onViewAll ? (
-    <Button
-      variant="text"
-      size="small"
+  const headerAction = (
+    <Typography
       onClick={onViewAll}
-      endIcon={<ArrowForwardIcon sx={{ fontSize: '14px !important' }} />}
       sx={{
         fontSize: '0.75rem',
         fontWeight: 600,
         color: '#2563EB',
-        textTransform: 'none',
-        padding: '2px 6px',
-        '&:hover': {
-          backgroundColor: '#EFF6FF',
-        },
+        cursor: 'pointer',
+        '&:hover': { textDecoration: 'underline' },
       }}
     >
-      Ver todos os projetos
-    </Button>
-  ) : null;
+      Ver todos os projetos →
+    </Typography>
+  );
 
   return (
     <DashboardCard
@@ -65,7 +58,7 @@ export const ProjectPipeline: React.FC<ProjectPipelineProps> = ({
             gridTemplateColumns: {
               xs: '1fr',
               sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
+              md: 'repeat(2, 1fr)',
               lg: 'repeat(4, 1fr)',
             },
             gap: '12px',

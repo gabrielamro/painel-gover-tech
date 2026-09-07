@@ -24,7 +24,7 @@ export const ExecutiveKpiCard: React.FC<ExecutiveKpiCardProps> = ({
   title,
   value,
   icon,
-  iconBg = '#DBEAFE',
+  iconBg = '#EFF6FF',
   iconColor = '#2563EB',
   comparison,
   footer,
@@ -36,121 +36,114 @@ export const ExecutiveKpiCard: React.FC<ExecutiveKpiCardProps> = ({
       onClick={onClick}
       sx={{
         backgroundColor: '#FFFFFF',
-        border: isActive ? '1.5px solid #2563EB' : '1px solid #E5EAF2',
+        border: isActive ? '1.5px solid #2563EB' : '1px solid #E2E8F0',
         borderRadius: '10px',
-        padding: '14px 16px',
+        padding: '16px',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        gap: '14px',
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease',
+        transition: 'all 0.2s ease',
         '&:hover': onClick
           ? {
               borderColor: '#2563EB',
-              transform: 'translateY(-1px)',
-              boxShadow: '0 2px 8px rgba(37, 99, 235, 0.08)',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
             }
           : undefined,
       }}
     >
-      {/* Top Header: Title and Icon */}
+      {/* Icon Circle on Left */}
       <Box
         sx={{
+          width: 44,
+          height: 44,
+          borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '8px',
+          justifyContent: 'center',
+          backgroundColor: iconBg,
+          color: iconColor,
+          flexShrink: 0,
         }}
       >
+        {icon}
+      </Box>
+
+      {/* Content Column on Right */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        {/* Title */}
         <Typography
           sx={{
             fontSize: '0.8125rem',
             fontWeight: 600,
             color: '#64748B',
             lineHeight: 1.2,
+            marginBottom: '4px',
           }}
         >
           {title}
         </Typography>
-        <Box
-          sx={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: iconBg,
-            color: iconColor,
-            flexShrink: 0,
-          }}
-        >
-          {icon}
-        </Box>
-      </Box>
 
-      {/* Main Metric Value */}
-      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
-        <Typography
-          sx={{
-            fontSize: '1.75rem',
-            fontWeight: 700,
-            color: '#0F2747',
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em',
-          }}
-        >
-          {value}
-        </Typography>
+        {/* Big Number + Comparison */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+          <Typography
+            sx={{
+              fontSize: '1.75rem',
+              fontWeight: 700,
+              color: '#0F172A',
+              lineHeight: 1,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {value}
+          </Typography>
 
-        {comparison && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Typography
-              component="span"
-              sx={{
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                color: comparison.isPositive
-                  ? '#16A34A'
-                  : comparison.isNeutral
-                  ? '#64748B'
-                  : '#EF4444',
-                lineHeight: 1,
-              }}
-            >
-              {comparison.text}
-            </Typography>
-            {comparison.subtext && (
+          {comparison && (
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography
                 component="span"
                 sx={{
                   fontSize: '0.6875rem',
-                  color: '#94A3B8',
-                  lineHeight: 1,
+                  fontWeight: 700,
+                  color: comparison.isPositive
+                    ? '#16A34A'
+                    : comparison.isNeutral
+                    ? '#64748B'
+                    : '#EF4444',
+                  lineHeight: 1.1,
                 }}
               >
-                {comparison.subtext}
+                {comparison.text}
               </Typography>
-            )}
-          </Box>
+              {comparison.subtext && (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: '0.625rem',
+                    color: '#94A3B8',
+                    lineHeight: 1,
+                  }}
+                >
+                  {comparison.subtext}
+                </Typography>
+              )}
+            </Box>
+          )}
+        </Box>
+
+        {/* Footer text */}
+        {footer && (
+          <Typography
+            sx={{
+              fontSize: '0.6875rem',
+              color: '#64748B',
+              lineHeight: 1.2,
+            }}
+          >
+            {footer}
+          </Typography>
         )}
       </Box>
-
-      {/* Footer Text / Indicators */}
-      {footer && (
-        <Box
-          sx={{
-            fontSize: '0.75rem',
-            color: '#64748B',
-            lineHeight: 1.3,
-            borderTop: '1px solid #F1F5F9',
-            paddingTop: '6px',
-            marginTop: '2px',
-          }}
-        >
-          {footer}
-        </Box>
-      )}
     </Box>
   );
 };
