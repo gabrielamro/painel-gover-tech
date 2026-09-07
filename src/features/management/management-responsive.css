@@ -1,0 +1,79 @@
+.management-chart-card{min-height:0;height:100%;overflow:hidden}
+.management-chart-card .MuiCardContent-root{height:100%;padding:8px 10px;display:flex;flex-direction:column;min-height:0}
+.management-systems-delivery{border:1px solid #e2e8f0;border-radius:8px;background:#fff}
+.management-systems-delivery .MuiPaper-root{border:0;padding:6px 8px 4px;height:100%}
+.management-chart-canvas{flex:1;min-height:0;height:auto;margin-top:2px}
+
+@media (min-width: 1001px){
+  .management-work-heading{padding:6px 10px 4px}
+  .management-kpis .MuiCardContent-root{min-height:0}
+}
+
+/* Telas baixas: gráficos compactos para caber sem scroll */
+@media (max-height: 800px) and (min-width: 1001px){
+  .management-screen{padding:8px 12px;gap:6px}
+  .management-screen h1{font-size:18px}
+  .management-header nav{font-size:11px}
+  .management-kpis{gap:6px}
+  .management-body{gap:6px}
+  .management-panel{padding:6px 8px}
+  .management-grid{gap:5px}
+  .management-charts{flex:1.4 1 auto;min-height:128px;max-height:168px;gap:6px}
+}
+
+/* Extra altura: os 3 gráficos crescem primeiro até o tamanho de leitura */
+@media (min-height: 820px) and (min-width: 1001px){
+  .management-charts{flex:2 1 auto;min-height:200px;max-height:280px}
+}
+
+@media (min-height: 920px) and (min-width: 1100px){
+  .management-charts{min-height:240px;max-height:320px}
+  .management-chart-card .MuiCardContent-root{padding:10px 12px}
+}
+
+/* Altura ideal atingida: gráficos travam e o restante absorve o espaço */
+@media (min-height: 1040px) and (min-width: 1280px){
+  .management-charts{flex:0 0 clamp(300px,30vh,360px);min-height:300px;max-height:360px}
+  .management-body{flex:1 1 auto}
+  .management-kpis{gap:10px}
+  .management-screen{padding:12px 18px;gap:10px}
+}
+
+@media (min-width: 1600px) and (min-height: 900px){
+  .management-charts{gap:12px}
+  .management-chart-card .MuiCardContent-root{padding:12px 14px}
+}
+
+@media (max-width: 1280px) and (min-width: 1001px){
+  .management-charts{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+@media (max-width: 1000px){
+  .management-screen{position:relative;inset:auto;min-height:100vh;height:auto;max-height:none;overflow:visible;padding:12px;display:flex;flex-direction:column}
+  .management-header{min-height:44px}
+  .management-kpis{grid-template-columns:repeat(2,minmax(0,1fr));min-height:auto;flex:none}
+  .management-kpis .management-contract-card{grid-column:1 / -1}
+  .management-kpis .MuiCard-root{min-height:104px}
+  .management-body{grid-template-columns:1fr;flex:none}
+  .management-work{min-height:600px}
+  .management-aside{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:180px}
+  .management-charts{grid-template-columns:1fr;flex:none;min-height:auto;max-height:none}
+  .management-chart-card{min-height:260px}
+}
+
+@media (max-width: 640px){
+  .management-screen{padding:8px;gap:8px}
+  .management-header{align-items:flex-start;flex-direction:column}
+  .management-header nav{width:100%;flex-wrap:wrap}
+  .management-header select{min-width:0;flex:1}
+  .management-kpis{grid-template-columns:1fr}
+  .management-kpis .management-contract-card{grid-column:auto}
+  .management-kpis .MuiCard-root{min-height:86px}
+  .management-grid{grid-template-columns:1fr;grid-template-rows:none}
+  .management-work{min-height:auto}
+  .management-card{min-height:112px}
+  .management-aside,.management-charts{grid-template-columns:1fr;grid-template-rows:none}
+  .management-aside{display:grid}
+  .management-chart-card{min-height:230px}
+  .management-chart-canvas{height:160px}
+}

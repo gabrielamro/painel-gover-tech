@@ -1,0 +1,26 @@
+:root {
+  --pp-bg-app: #f7f7f8;
+  --pp-bg-sidebar: #061a38;
+  --pp-surface: #ffffff;
+  --pp-surface-hover: #f8fafc;
+  --pp-primary: #002fa7;
+  --pp-primary-hover: #001f70;
+  --pp-primary-soft: #eef4ff;
+  --pp-text-primary: #101828;
+  --pp-text-secondary: #475467;
+  --pp-text-tertiary: #98a2b3;
+  --pp-border: #eaecf0;
+  --pp-success: #12b76a;
+  --pp-success-soft: #ecfdf3;
+  --pp-warning: #f79009;
+  --pp-warning-soft: #fffaeb;
+  --pp-danger: #f04438;
+  --pp-danger-soft: #fef3f2;
+  --pp-purple: #7f56d9;
+  --pp-purple-soft: #f4f3ff;
+  --pp-radius-sm: 6px;
+  --pp-radius-md: 10px;
+  --pp-shadow-sm: 0 1px 2px rgb(16 24 40 / 6%);
+  --pp-shadow-md: 0 6px 14px rgb(16 24 40 / 8%);
+  --pp-font: "Helvetica Neue", Arial, sans-serif;
+}

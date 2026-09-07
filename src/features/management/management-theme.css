@@ -1,0 +1,12 @@
+/* Same typography and palette as executiveTheme and executive KPI tokens. */
+.management-screen{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#102a43;background:#f7f9fc}
+.management-screen h1,.management-screen h2{font-family:'Space Grotesk',sans-serif}
+.management-panel,.management-card{border-color:#e2e8f0;border-radius:10px;box-shadow:0 1px 3px #102a4308}
+.management-contract b{color:#2563eb}
+.management-temporary-tag{display:inline-flex;align-items:center;align-self:flex-start;background:#fffbeb;border:1px solid #fde68a;color:#92400e!important;border-radius:5px;padding:2px 5px;font-size:9px!important;line-height:1.2;font-weight:600;white-space:nowrap}
+.management-card{position:relative}
+.management-temporary-summary{display:flex;align-items:center;gap:6px;border-color:#e2e8f0!important;background:#fff!important}
+.management-work-card{display:flex;flex-direction:column;min-height:0}
+.management-work-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 6px}
+.management-card-objective{font-size:.72rem!important;font-weight:600!important;line-height:1.3!important;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.management-aside>.MuiCard-root{min-height:0}

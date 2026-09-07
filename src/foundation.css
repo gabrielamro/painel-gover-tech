@@ -1,0 +1,45 @@
+.react-sidebar nav a {
+  background: transparent;
+  border-radius: 7px;
+  color: #a9bfd0;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 11px 12px;
+  text-align: left;
+  text-decoration: none;
+}
+
+.react-sidebar nav a.active,
+.react-sidebar nav a:hover {
+  background: #1d4567;
+  color: #fff;
+}
+
+.react-error-state {
+  align-content: center;
+  background: #f6f9fc;
+  color: #19324a;
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.react-error-state h1,
+.react-error-state p { margin: 0; }
+
+.react-error-state button {
+  background: #2f72d2;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 14px;
+}
+
+@media (max-width: 760px) {
+  .react-sidebar nav a:not(.active) { display: none; }
+  .react-sidebar nav a { font-size: 9px; padding: 10px 4px; text-align: center; }
+}
