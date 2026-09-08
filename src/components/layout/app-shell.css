@@ -1,5 +1,7 @@
 .pp-shell { background: var(--pp-bg-app); display: grid; grid-template-columns: 236px minmax(0, 1fr); min-height: 100vh; transition: grid-template-columns .18s ease; }
 .pp-shell--collapsed { grid-template-columns: 72px minmax(0, 1fr); }
+.pp-shell--no-sidebar { display: block; grid-template-columns: none; }
+.pp-shell--no-sidebar .pp-main { width: 100%; min-width: 0; }
 .pp-sidebar { background: var(--pp-bg-sidebar); color: #d0d5dd; display: flex; flex-direction: column; min-height: 100vh; padding: 16px 12px; }
 .pp-sidebar__brand { align-items: center; color: #fff; display: flex; font-size: 18px; gap: 9px; min-height: 40px; padding: 0 4px; }
 .pp-sidebar__brand strong { letter-spacing: -.04em; white-space: nowrap; }

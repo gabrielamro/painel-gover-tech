@@ -1,8 +1,10 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Tooltip } from '@mui/material';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import FullscreenOutlinedIcon from '@mui/icons-material/FullscreenOutlined';
+import FullscreenExitOutlinedIcon from '@mui/icons-material/FullscreenExitOutlined';
 import { SuframaLogo } from './SuframaLogo';
 
 interface DashboardHeaderProps {
@@ -22,6 +24,32 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   selectedSystem = 'Todos os sistemas',
   lastUpdatedText = '05/08/2026 10:24',
 }) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+
+    setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const handleToggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error('Fullscreen request failed:', err);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -63,7 +91,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </Box>
       </Box>
 
-      {/* Right side: 4 Two-row Filters */}
+      {/* Right side: 4 Two-row Filters + Fullscreen Icon Button (sem texto) */}
       <Box
         sx={{
           display: 'flex',
@@ -174,6 +202,47 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </Typography>
           </Box>
         </Box>
+
+        {/* Button: Tela Cheia (apenas ícone como botão, sem texto) */}
+        <Tooltip title={isFullscreen ? 'Sair da tela cheia' : 'Abrir em tela cheia'} arrow>
+          <Box
+            onClick={handleToggleFullscreen}
+            role="button"
+            tabIndex={0}
+            aria-label={isFullscreen ? 'Sair da tela cheia' : 'Abrir em tela cheia'}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleToggleFullscreen();
+              }
+            }}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              width: '42px',
+              height: '42px',
+              cursor: 'pointer',
+              color: '#64748B',
+              flexShrink: 0,
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                borderColor: '#CBD5E1',
+                color: '#2563EB',
+                backgroundColor: '#F8FAFC',
+              },
+            }}
+          >
+            {isFullscreen ? (
+              <FullscreenExitOutlinedIcon sx={{ fontSize: 20 }} />
+            ) : (
+              <FullscreenOutlinedIcon sx={{ fontSize: 20 }} />
+            )}
+          </Box>
+        </Tooltip>
       </Box>
     </Box>
   );

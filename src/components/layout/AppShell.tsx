@@ -67,6 +67,7 @@ export function AppShell() {
 
   const active = items.find((item) => item.path === location.pathname);
   const isDesignSystem = location.pathname === '/design-system';
+  const isSuperintendence = location.pathname === '/superintendencia';
   const groups = [...new Set(items.map((item) => item.group))];
 
   const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
@@ -88,9 +89,14 @@ export function AppShell() {
   );
 
   return (
-    <div className={`pp-shell ${collapsed ? 'pp-shell--collapsed' : ''}`}>
+    <div
+      className={`pp-shell ${collapsed ? 'pp-shell--collapsed' : ''} ${
+        isSuperintendence ? 'pp-shell--no-sidebar' : ''
+      }`}
+    >
       {/* Sidebar */}
-      <aside className="pp-sidebar">
+      {!isSuperintendence && (
+        <aside className="pp-sidebar">
         <div className="pp-sidebar__brand">
           <PainelGoverLogo variant="dark" collapsed={collapsed} />
           <Tooltip title={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'} arrow>
@@ -185,10 +191,11 @@ export function AppShell() {
           )}
         </Box>
       </aside>
+      )}
 
       {/* Main Content Area */}
       <main className="pp-main">
-        {!isDesignSystem && (
+        {!isDesignSystem && !isSuperintendence && (
           <header className="pp-topbar">
             {/* Breadcrumb / Context */}
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
