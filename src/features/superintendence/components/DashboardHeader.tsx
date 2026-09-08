@@ -6,6 +6,7 @@ import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import FullscreenOutlinedIcon from '@mui/icons-material/FullscreenOutlined';
 import FullscreenExitOutlinedIcon from '@mui/icons-material/FullscreenExitOutlined';
 import { SuframaLogo } from './SuframaLogo';
+import { GoverLogo } from './GoverLogo';
 
 interface DashboardHeaderProps {
   selectedPeriod?: string;
@@ -61,11 +62,31 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         paddingBottom: '4px',
       }}
     >
-      {/* Left side: Logo + Title + Subtitle */}
+      {/* Left side: Suframa Logo | Gover Logo | Title + Subtitle */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <SuframaLogo />
 
-        <Box sx={{ borderLeft: '1px solid #E2E8F0', paddingLeft: '16px' }}>
+        <Box
+          sx={{
+            height: '32px',
+            width: '1px',
+            backgroundColor: '#E2E8F0',
+            flexShrink: 0,
+          }}
+        />
+
+        <GoverLogo height={26} />
+
+        <Box
+          sx={{
+            height: '32px',
+            width: '1px',
+            backgroundColor: '#E2E8F0',
+            flexShrink: 0,
+          }}
+        />
+
+        <Box>
           <Typography
             component="h1"
             sx={{

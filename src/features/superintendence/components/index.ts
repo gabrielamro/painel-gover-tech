@@ -15,3 +15,5 @@ export * from './DeliveriesBySystemChart';
 export * from './DeliveryForecastChart';
 export * from './PortfolioStatusChart';
 export * from './SprintsBySystemChart';
+export * from './SuframaLogo';
+export * from './GoverLogo';
